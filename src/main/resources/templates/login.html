@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="/webjars/jquery/2.1.4/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/webjars/bootstrap/3.3.5/css/bootstrap.min.css" />
+</head>
+<body class="glyphicon-log-in">
+
+<div class="container" style="width: 400px;height: 380px; border:azure solid 1px;
+ background:aliceblue;border-radius:15px; margin-top: 200px">
+    <h3 class="form-horizontal" style="margin-bottom: 30px">用户登陆</h3>
+    <div class="form-group" style="margin-bottom: 30px">
+    <label class="control-label" style="margin-bottom: 30px">手机号</label>
+    <div style="margin-bottom: 30px">
+        <input class="form-control" type="text" placeholder="手机号" name="telphone" id="telphone">
+    </div>
+</div>
+    <div class="form-group" style="margin-bottom: 30px">
+        <label class="control-label" style="margin-bottom: 30px">密码</label>
+        <div style="margin-bottom: 30px">
+            <input class="form-control" type="password" placeholder="密码" name="passwd" id="passwd">
+        </div>
+    </div>
+    <div class="form-actions" style="width: 100px">
+    <button class="btn btn-success" id="login" type="submit">登陆</button>
+        <button class="btn btn-success" id="register" type="submit" style="float: right;margin-right: -150px">注冊</button>
+</div>
+</div>
+</body>
+<script>
+
+    jQuery(document).ready(function () {
+
+        $("#login").on("click",function () {
+            var telphone = $("#telphone").val();
+            var passwd = $("#passwd").val();
+            if(telphone == null || telphone == ""){
+                alert("手机号不能为空")
+                return false;
+            }
+            if(passwd == null || passwd == ""){
+                alert("密码不能为空")
+                return false;
+            }
+            $.ajax({
+                type:"POST",
+                contentType:"application/x-www-form-urlencoded",
+                url:"http://localhost:8080/user/login",
+                data:{
+                    "telphone":telphone,
+                    "passwd":passwd
+                },
+                xhrFileds:{withCredentials:true},        /*JS 跨域请求session共享*/
+                success:function (data) {
+                    if(data.status == "success"){
+                        alert("登陆成功");
+                        window.location.href="http://localhost:8080/item/goList";
+                    }else{
+                        alert("登陆失败，原因："+data.data.errMsg);
+                    }
+                },
+                fail:function (data) {
+                    alert("otp 登陆失败:"+data.responseText);
+                }
+            });
+            return false;
+        })
+    });
+</script>
+</html>

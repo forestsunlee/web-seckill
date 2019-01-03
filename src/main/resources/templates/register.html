@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="/webjars/jquery/2.1.4/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/webjars/bootstrap/3.3.5/css/bootstrap.min.css"/>
+</head>
+<body class="glyphicon-log-in">
+
+<div class="container" style="width: 500px;height: 700px; border:azure solid 1px;
+ background:aliceblue;border-radius:15px;">
+    <h3 class="form-horizontal" style="margin-bottom: 40px">用户注册</h3>
+    <div class="form-group" style="margin-bottom: 20px">
+        <label class="control-label" style="margin-bottom: 20px">手机号或邮箱</label>
+        <div style="margin-bottom: 20px">
+            <input class="form-control" type="text" placeholder="手机号或邮箱" name="telphone" id="telphone">
+        </div>
+    </div>
+    <div class="form-group" style="margin-bottom: 20px">
+        <label class="control-label" style="margin-bottom: 20px">验证码</label>
+        <div style="margin-bottom: 20px">
+            <input class="form-control" type="text" placeholder="验证码" name="otpCode" id="otpCode">
+        </div>
+    </div>
+    <div class="form-group" style="margin-bottom: 20px">
+        <label class="control-label" style="margin-bottom: 20px">用户昵称</label>
+        <div style="margin-bottom: 20px">
+            <input class="form-control" type="text" placeholder="用户昵称" name="name" id="name">
+        </div>
+    </div>
+    <div class="form-group" style="margin-bottom: 20px">
+        <label class="control-label" style="margin-bottom: 20px">性别</label>
+        <div style="margin-bottom: 20px">
+            <input class="form-control" type="text" placeholder="性别" name="gender" id="gender">
+        </div>
+    </div>
+    <div class="form-group" style="margin-bottom: 20px">
+        <label class="control-label" style="margin-bottom: 20px">年龄</label>
+        <div style="margin-bottom: 20px">
+            <input class="form-control" type="text" placeholder="年龄" name="age" id="age">
+        </div>
+    </div>
+    <div class="form-group" style="margin-bottom: 20px">
+        <label class="control-label" style="margin-bottom: 20px">密码</label>
+        <div style="margin-bottom: 20px">
+            <input class="form-control" type="password" placeholder="密码" name="passwd" id="passwd">
+        </div>
+    </div>
+    <div class="form-actions" style="margin-bottom: 20px">
+        <button class="btn btn-success" id="register" type="submit">提交注册</button>
+    </div>
+</div>
+</body>
+
+<script>
+
+    jQuery(document).ready(function () {
+
+        $("#register").on("click", function () {
+            var telphone = $("#telphone").val();
+            var otpCode = $("#otpCode").val();
+            var name = $("#name").val();
+            var gender = $("#gender").val();
+            var age = $("#age").val();
+            var passwd = $("#passwd").val();
+            if (telphone == null || telphone == "") {
+                alert("手机号或邮箱不能为空")
+                return false;
+            }
+            if (otpCode == null || otpCode == "") {
+                alert("验证码不能为空")
+                return false;
+            }
+            if (name == null || name == "") {
+                alert("用户昵称不能为空")
+                return false;
+            }
+            if (gender == null ) {
+                alert("无效的年龄")
+                return false;
+            }
+            if (passwd == null || passwd == "") {
+                alert("密码不能为空")
+                return false;
+            }
+
+            $.ajax({
+                type: "POST",
+                contentType: "application/x-www-form-urlencoded",
+                url: "http://localhost:8080/user/register",
+                data: {
+                    "telphone": telphone,
+                    "otpCode": otpCode,
+                    "gender": gender,
+                    "age": age,
+                    "passwd": passwd,
+                    "name" : name
+                },
+                success: function (data) {
+                    if (data.status == "success") {
+                        alert("注册成功");
+                        window.location("http://localhost:8080/user/goLogin");
+                    } else {
+                        alert("注册失败：" + data.data.errMsg);
+                    }
+                },
+                fail: function (data) {
+                    alert("注册失败:" + data.responseText);
+                }
+            });
+            return false;
+        })
+    });
+</script>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="/webjars/jquery/2.1.4/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/webjars/bootstrap/3.3.5/css/bootstrap.min.css"/>
+</head>
+<body class="glyphicon-log-in">
+
+<div class="container" style="width: 500px;height: 750px; border:azure solid 1px;
+ background:aliceblue;border-radius:15px;">
+    <h3 class="form-horizontal" style="margin-bottom: 40px">商品详情</h3>
+    <div class="form-group" id="promoStartTimeContainer" style="margin-bottom: 20px">
+        <label class="control-label" style="color: blue;" id="seckillStatus"></label>
+        <div>
+            <label class="control-label" style="color: red;" id="promoStartTime"/>
+        </div>
+    </div>
+    <div class="form-group" style="margin-bottom: 20px">
+        <label class="control-label">商品名</label>
+        <div>
+            <label class="control-label" id="title"/>
+        </div>
+    </div>
+    <div class="form-group" style="margin-bottom: 20px">
+        <label class="control-label">商品描述</label>
+        <div>
+            <label class="control-label" id="description"/>
+        </div>
+    </div>
+    <div class="form-group" id="normalPrice" style="margin-bottom: 20px">
+        <label class="control-label">价格</label>
+        <div>
+            <label class="control-label" id="price"/>
+        </div>
+    </div>
+    <div class="form-group" id="promoPriceContainer" style="margin-bottom: 20px">
+        <label style="color:red" class="control-label">活动价格</label>
+        <div>
+            <label style="color: red;" class="control-label" id="promoPrice"/>
+        </div>
+    </div>
+    <div class="form-group" style="margin-bottom: 20px">
+        <label class="control-label">图片</label>
+        <div>
+            <img style="width: 100px;hight:auto" id="imgUrl">
+        </div>
+    </div>
+    <div class="form-group" style="margin-bottom: 20px">
+        <label class="control-label">库存</label>
+        <div>
+            <label class="control-label" id="stock"/>
+        </div>
+    </div>
+    <div class="form-group" style="margin-bottom: 20px">
+        <label class="control-label">销量</label>
+        <div>
+            <label class="control-label" id="sales"/>
+        </div>
+    </div>
+    <div class="form-actions">
+    <button class="btn-default" id="createorder" type="submit">
+    下单
+    </button>
+    </div>
+</div>
+</body>
+
+<script>
+
+    var g_itemVO = {};
+    /*从服务器返回的modelAndView中获取Id*/
+    var id='${id}';
+    jQuery(document).ready(function () {
+
+        //获取商品详情
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/item/get",
+            data: {
+                "id":id
+            },
+            success: function (data) {
+                if (data.status == "success") {
+                    g_itemVO = data.data;
+                    reloadDom();
+                    setInterval(reloadDom,1000);
+                } else {
+                    alert("获取信息失败：" + data.data.errMsg);
+                }
+            },
+            fail: function (data) {
+                alert("获取信息失败:" + data.responseText);
+            }
+        });
+
+
+
+        $("#createorder").on("click",function () {
+            $.ajax({
+                type: "POST",
+                url: "http://localhost:8080/order/createorder",
+                contentType:"application/x-www-form-urlencoded",
+                data: {
+                    "itemId": g_itemVO.id,
+                    "amount": 1,
+                    "promoId": g_itemVO.promoId
+                },
+                xhrFields:{withCredentials:true},
+                success: function (data) {
+                    if (data.status == "success") {
+                        alert("下单成功")
+                        window.location.reload();
+                    } else {
+                        alert("下单失败：" + data.data.errMsg);
+                        window.location.href="http://localhost:8080/user/goLogin";
+                    }
+                },
+                fail: function (data) {
+                    alert("下单失败:" + data.responseText);
+                }
+            });
+
+        });
+
+    });
+    function reloadDom() {
+        $("#title").text(g_itemVO.title);
+        $("#description").text(g_itemVO.description);
+        $("#price").text(g_itemVO.price);
+        $("#stock").text(g_itemVO.stock);
+        $("#imgUrl").attr("src",g_itemVO.imgUrl);
+        $("#sales").text(g_itemVO.sales);
+        if(g_itemVO.promoStatus==1){
+        //秒杀活动还未开始
+            var startTime = g_itemVO.startTime.replace(new RegExp("-","gm"),"/");
+            startTime= (new Date(startTime)).getTime();
+            var nowTime = Date.parse(new Date());
+            var delta = (startTime - nowTime)/1000;
+            if(delta<=0){
+                g_itemVO.promoStatus = 2;
+                reloadDom();
+            }
+            
+            $("#promoStartTime").text("秒杀活动将在："+g_itemVO.startTime+" 开始 倒计时："+delta+" 秒");
+            $("#promoPrice").text(g_itemVO.promoPrice);
+            $("#createorder").attr("disabled",true);
+        }else if(g_itemVO.promoStatus==2){
+            $("#promoStartTime").text("秒杀活动正在进行中");
+            $("#promoPrice").text(g_itemVO.promoPrice);
+            $("#createorder").attr("disabled",false);
+            $("#normalPrice").hide();
+        }
+    }
+</script>
+</html>
